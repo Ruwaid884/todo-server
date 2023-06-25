@@ -1,0 +1,57 @@
+<head>
+    <title>
+        Todo App
+    </title>
+</head>
+<script>
+function parsedResponse(data){
+    console.log(data);
+
+}
+
+function callback(resp){
+    resp.json().then(parsedResponse);
+}
+
+function onPress(){
+    
+    fetch("http://localhost:3000/todos",{
+        method:"GET"
+    }).then(callback)
+}
+
+function onPost(){
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    fetch("http://localhost:3000/todos", {
+                method: "POST",
+                body: JSON.stringify({
+                    title: title,
+                    description: description
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(callback);
+            
+            title.value = ""; // Clear input field after submission
+            description.value = ""; // Clear input field after submission
+        }
+
+
+</script>
+<body>
+    Todo Title
+<input type="text" id="title"></input>
+<br><br>
+Todo Description
+<input type="text" id="description"></input>
+<br><br>
+
+<button onclick="onPost()">post Todo</button>
+<br><br>
+<button onclick="onPress()">Get Todo</button>
+
+
+</body> 

@@ -43,6 +43,7 @@
   const express = require('express');
   const bodyParser = require('body-parser');
   const fs = require('fs');
+  const path = require('path');
   
   const app = express();
   const port = 3000;
@@ -146,6 +147,12 @@
   app.post('/todos',createTodo);
   app.put('/todos/:id',Updateid);
   app.delete('/todos/:id',DeleteTodo);
+  
+
+
+  app.get("/",(req,res)=>{
+    res.sendFile(path.join(__dirname,"index.html"));
+  })
 
 
  function handleNotFound(req, res, next) {
