@@ -5,15 +5,18 @@
 </head>
 <script>
 
-
     var data_size = 0;
 
-    function deleteDone(name){
-        
-   var parentDiv = document.querySelector("[name='" + name + "']");
+    var todos = [];
 
-            parentDiv.parentNode.removeChild(parentDiv);
-            console.log(name);
+
+    function deleteDone(id){
+        console.log(id);
+        var parentDiv = document.querySelector("[data-id='" + id + "']");
+   if (parentDiv) {
+        parentDiv.parentNode.removeChild(parentDiv);
+        console.log(id);
+    }
 }
 
     
@@ -31,67 +34,86 @@ function deleteTodo(id,name){
 }
     function todosCallBack(data){
 
-        console.log("here is the data ");
-        console.log(data.length);
+        
         var parentElement = document.getElementById("mainArea");
 
-        for(var i = 0;i<data.length;i++){
-            var childelement = document.createElement("div");
-            childelement.setAttribute("name",data_size);
-            data_size++;
+        var currentChildren = Array.from(parentElement.children);
+     
+
+
+    data.forEach(function(item){
+        console.log(data);
+        
+        var existingChild = currentChildren.find((child)=>{
+            return child.dataset.id === String(item.id);
+    });
+    console.log("currentChildren:", currentChildren);
+
+    if (existingChild) {
+      // If it exists, update it
+      existingChild.children[1].innerHTML = item.title;
+      existingChild.children[2].innerHTML = item.description;
+      // Remove it from the currentChildren array
+      currentChildren = currentChildren.filter(function(child) {
+        return child !== existingChild;
+      });
+    }
+    else{
+        var childelement = document.createElement("div");
+            childelement.dataset.id =item.id;
+            console.log(childelement.dataset.id);
         var grandChildElement1 = document.createElement("span");
-        grandChildElement1.innerHTML = data[i].title;
+        grandChildElement1.innerHTML = item.title;
         var grandChildElement2 = document.createElement("span");
-        grandChildElement2.innerHTML = data[i].description;
+        grandChildElement2.innerHTML = item.description;
         var grandChildElement3 = document.createElement("button");
         grandChildElement3.innerHTML = "Delete";
-        grandChildElement3.setAttribute("onclick", "deleteTodo(" + data[i].id + ", this.parentNode.getAttribute('name'))");
-
-
+        grandChildElement3.setAttribute("onclick", "deleteTodo(" + item.id + ", this.parentNode.dataset.id)");
 
         childelement.appendChild(grandChildElement1)
         childelement.appendChild(grandChildElement2);
         childelement.appendChild(grandChildElement3);
         
         parentElement.appendChild(childelement);
+        
+    }
 
-        }
+    
+    });
+    console.log("currentChildren:", currentChildren);
+    currentChildren.forEach((child)=> {
+    parentElement.removeChild(child);
+    console.log(currentChildren);
+  });
+
     }
 
     function getDataCallBack(resp){
-        console.log("ten");
         resp.json().then(todosCallBack);
-        console.log("eleven");
     }
 
 function getData(){
-    console.log("eight");
     fetch("http://localhost:3000/todos",{
         method:"GET",
     }).then(getDataCallBack);
 
-    console.log("nine");
 }
-console.log("seven");
 getData();
 
 
 
 function parsedResponse(data){
 
-
-    console.log("five");
     var parentElement = document.getElementById("mainArea");
     var childelement = document.createElement("div");
-    childelement.setAttribute("name",data_size);
-    data_size++;
+    childelement.dataset.id = data.id;
         var grandChildElement1 = document.createElement("span");
         grandChildElement1.innerHTML = data.title;
         var grandChildElement2 = document.createElement("span");
         grandChildElement2.innerHTML = data.description;
         var grandChildElement3 = document.createElement("button");
         grandChildElement3.innerHTML = "Delete";
-        grandChildElement3.setAttribute("onclick", "deleteTodo(" + data.id + ", this.parentNode.getAttribute('name'))");
+        grandChildElement3.setAttribute("onclick", "deleteTodo(" + data.id + ", this.parentNode.dataset.id)");
 
         childelement.appendChild(grandChildElement1)
         childelement.appendChild(grandChildElement2);
@@ -99,17 +121,16 @@ function parsedResponse(data){
         
         parentElement.appendChild(childelement);
 
-        console.log("six");
 
 }
 
 function callback(resp){
-    console.log("three");
+  
     resp.json().then(parsedResponse);
-    console.log("four");
+  
 }
 function onPost(){
-    console.log("first");
+   
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
     document.getElementById('title').value = ""
@@ -125,7 +146,7 @@ function onPost(){
                 }
             })
             .then(callback);
-            console.log("second");
+            
         }
 
 
