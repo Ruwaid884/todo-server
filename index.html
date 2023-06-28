@@ -5,37 +5,50 @@
 </head>
 <script>
 
-    function deleteDone(id){
-        console.log(id);
 
-    }
+    var data_size = 0;
+
+    function deleteDone(name){
+        
+   var parentDiv = document.querySelector("[name='" + name + "']");
+
+            parentDiv.parentNode.removeChild(parentDiv);
+            console.log(name);
+}
+
+    
 
 
-function deleteTodo(id){
+function deleteTodo(id,name){
     fetch("http://localhost:3000/todos/" + id, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json"
                 }
             })
-            .then(deleteDone(id));
+            .then(deleteDone(name));
 
 }
     function todosCallBack(data){
-        console.log(data);
+
+        console.log("here is the data ");
+        console.log(data.length);
         var parentElement = document.getElementById("mainArea");
 
         for(var i = 0;i<data.length;i++){
             var childelement = document.createElement("div");
-            childelement.setAttribute("name",i);
+            childelement.setAttribute("name",data_size);
+            data_size++;
         var grandChildElement1 = document.createElement("span");
         grandChildElement1.innerHTML = data[i].title;
         var grandChildElement2 = document.createElement("span");
         grandChildElement2.innerHTML = data[i].description;
         var grandChildElement3 = document.createElement("button");
         grandChildElement3.innerHTML = "Delete";
+        grandChildElement3.setAttribute("onclick", "deleteTodo(" + data[i].id + ", this.parentNode.getAttribute('name'))");
 
-        grandChildElement3.setAttribute("onclick","deleteTodo("+data[i].id+")")
+
+
         childelement.appendChild(grandChildElement1)
         childelement.appendChild(grandChildElement2);
         childelement.appendChild(grandChildElement3);
@@ -46,28 +59,39 @@ function deleteTodo(id){
     }
 
     function getDataCallBack(resp){
+        console.log("ten");
         resp.json().then(todosCallBack);
+        console.log("eleven");
     }
 
 function getData(){
+    console.log("eight");
     fetch("http://localhost:3000/todos",{
         method:"GET",
     }).then(getDataCallBack);
+
+    console.log("nine");
 }
+console.log("seven");
 getData();
 
 
-function parsedResponse(data){
-    console.log(data);
 
+function parsedResponse(data){
+
+
+    console.log("five");
     var parentElement = document.getElementById("mainArea");
     var childelement = document.createElement("div");
+    childelement.setAttribute("name",data_size);
+    data_size++;
         var grandChildElement1 = document.createElement("span");
         grandChildElement1.innerHTML = data.title;
         var grandChildElement2 = document.createElement("span");
         grandChildElement2.innerHTML = data.description;
         var grandChildElement3 = document.createElement("button");
         grandChildElement3.innerHTML = "Delete";
+        grandChildElement3.setAttribute("onclick", "deleteTodo(" + data.id + ", this.parentNode.getAttribute('name'))");
 
         childelement.appendChild(grandChildElement1)
         childelement.appendChild(grandChildElement2);
@@ -75,14 +99,21 @@ function parsedResponse(data){
         
         parentElement.appendChild(childelement);
 
+        console.log("six");
+
 }
 
 function callback(resp){
+    console.log("three");
     resp.json().then(parsedResponse);
+    console.log("four");
 }
 function onPost(){
+    console.log("first");
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
+    document.getElementById('title').value = ""
+    document.getElementById('description').value= ""; 
     fetch("http://localhost:3000/todos", {
                 method: "POST",
                 body: JSON.stringify({
@@ -94,9 +125,7 @@ function onPost(){
                 }
             })
             .then(callback);
-
-            title.value = ""; // Clear input field after submission
-            description.value = ""; // Clear input field after submission
+            console.log("second");
         }
 
 
