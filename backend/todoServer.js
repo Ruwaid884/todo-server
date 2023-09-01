@@ -223,9 +223,13 @@
 
 
   app.get("/",(req,res)=>{
+<<<<<<< HEAD
     console.log(__dirname);
    res.sendFile(path.join(__dirname,"../frontend/index.html"));
 
+=======
+    res.sendFile(path.join(__dirname,"../frontend/index.html"));
+>>>>>>> eecc437e8d3185d9beb2f398a6e33e9e09d7b38f
   })
 
 
