@@ -392,11 +392,13 @@ function showEditContainer(id) {
 
 
       function todosCallBack(data) {
+        console.log("todocallback");
+        console.log(data);
         var parentElement = document.getElementById("mainArea");
 
         var currentChildren = Array.from(parentElement.children);
 
-        data.forEach(function (item) {
+        data.forEach((item)=> {
           console.log(data);
 
           var existingChild = currentChildren.find((child) => {

@@ -44,114 +44,188 @@
   const bodyParser = require('body-parser');
   const fs = require('fs');
   const path = require('path');
+  const cors = require("cors");
+  const mongoose = require('mongoose')
+
+
+  const todoSchema = new mongoose.Schema({
+    title:{type:String},
+    description:{type:String}
+  });
+
+  const Todos = mongoose.model('Todos',todoSchema);
+
+  mongoose.connect('mongodb+srv://ruwaid:ruwaid@cluster0.mlnnycw.mongodb.net/Courses');
+
+
   
   const app = express();
   const port = 3000;
-  let counter_id =0;
+   app.use(cors());
+
+  // let counter_id =0;
   
-  var todos = [];
+  // var todos = [];
   
-  app.use(bodyParser.json());
-  function loadTodos() {
-    try {
-      const data = fs.readFileSync('todos.json');
-      todos = JSON.parse(data);
-    } catch (error) {
-      todos = [];
-    }
-  }
+  // app.use(bodyParser.json());
+  // function loadTodos() {
+  //   try {
+  //     const data = fs.readFileSync('todos.json');
+  //     todos = JSON.parse(data);
+  //   } catch (error) {
+  //     todos = [];
+  //   }
+  // }
   
-  // Save todos to file
-  function saveTodos() {
-    fs.writeFileSync('todos.json', JSON.stringify(todos));
-  }
+  // // Save todos to file
+  // function saveTodos() {
+  //   fs.writeFileSync('todos.json', JSON.stringify(todos));
+  // }
 
  
   
-  function getTodo(req,res){
-     loadTodos();
-      res.status(200).json(todos);
+  // function getTodo(req,res){
+  //    loadTodos();
+  //     res.status(200).json(todos);
+  // }
+
+  // function getTodoId(req,res){
+  // const foundId = todos.find(todo => todo.id===parseInt(req.params.id));
+  // if(foundId){
+  //    res.status(200).json(foundId);
+  // }
+  // else {
+  //    res.status(404).send();
+  // }
+  
+  // };
+  // function generateRandomId() {
+  //   const min = 1000; 
+  //   const max = 9999; 
+  //   return Math.floor(Math.random() * (max - min + 1)) + min;
+  // };
+  
+  // function isIdUnique(id) {
+  //   return todos.every(todo => todo.id !== id);
+  // };
+  // function uniqueID(){
+  
+  //     let id = generateRandomId();
+  //     while (!isIdUnique(id)) {
+  //       id = generateRandomId();
+  //     }
+  //     return id;
+  // };
+  
+  // function createTodo(req,res){
+    
+  //   const todo = {
+  //     id: uniqueID(),
+  //     title: req.body.title,
+  //     completed:req.body.completed,
+  //     description: req.body.description
+  //   }
+  //   todos.push(todo);
+  //   saveTodos();
+  //    res.status(201).json(todo);
+  // }
+  //   function Updateid (req,res){
+  //     const foundIdindex = todos.findIndex(todo => todo.id ===parseInt(req.params.id));
+  //     if(foundIdindex === -1){
+  //       res.status(404).send();
+  //     }
+  //     else{
+  //       todos[foundIdindex].title = req.body.title;
+  //       todos[foundIdindex].completed = req.body.completed;
+  //       todos[foundIdindex].description = req.body.description;
+  //       saveTodos();
+  //       res.status(200).json(todos[foundIdindex]);
+        
+  //     }
+  
+  //   }
+  // function DeleteTodo(req,res){
+  
+  //   const index = todos.findIndex(t => t.id ===parseInt(req.params.id));
+  //   if (index === -1) {
+  //      res.status(404).send();
+  //   } else {
+  //     todos.splice(index, 1);
+  //     saveTodos();
+  //      res.status(200).send();
+  //   }
+  
+  // }
+  
+  
+  app.get('/todos/:id',async (req,res)=>{
+    const todo = await Todos.findById(req.params.id);
+    if(todo){
+      res.status(200).json({todo});
+    }
+    else{
+      res.status(404).json({"message":"todo not found"});
+    }
+  });
+  app.get('/todos',async (req,res)=>{
+    const todo = await Todos.find({});
+    res.status(200).json(todo);
+  });
+
+
+  app.post('/todos',async (req,res)=>{
+
+  
+      const newtodo = {
+        title: req.body.title,
+        description: req.body.description
+      };
+    
+
+   const todo = new Todos(newtodo);
+   console.log(newtodo);
+    await todo.save();
+    const output = {
+      message:"Todo created Successfully",
+      todoId:todo._id,
+      todo:todo
+    }
+    res.status(200).json(output);
+  });
+
+  app.put('/todos/:id',async (req,res)=>{
+    const todo = await Todos.findByIdAndUpdate(req.params.id,req.body,{new:true});
+    if(todo){
+      const output = {
+            message: "Todo updated successfully"
+          }
+          res.status(200).json(output);
+    }
+    else{
+      res.status(404).json({message: 'Todo not found'});
+    }
+  });
+
+  app.delete('/todos/:id',async (req,res)=>{
+  const todo = await Todos.findByIdAndDelete(req.params.id,{new:true});
+  if(todo){
+    const output = {
+          message: "Todo deleted successfully"
+        }
+        res.status(200).json(output);
+  }
+  else{
+    res.status(404).json({message: 'Todo not found'});
   }
 
-  function getTodoId(req,res){
-  const foundId = todos.find(todo => todo.id===parseInt(req.params.id));
-  if(foundId){
-     res.status(200).json(foundId);
-  }
-  else {
-     res.status(404).send();
-  }
-  
-  };
-  function generateRandomId() {
-    const min = 1000; 
-    const max = 9999; 
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-  
-  function isIdUnique(id) {
-    return todos.every(todo => todo.id !== id);
-  };
-  function uniqueID(){
-  
-      let id = generateRandomId();
-      while (!isIdUnique(id)) {
-        id = generateRandomId();
-      }
-      return id;
-  };
-  
-  function createTodo(req,res){
-    
-    const todo = {
-      id: uniqueID(),
-      title: req.body.title,
-      completed:req.body.completed,
-      description: req.body.description
-    }
-    todos.push(todo);
-    saveTodos();
-     res.status(201).json(todo);
-  }
-    function Updateid(req,res){
-      const foundIdindex = todos.findIndex(todo => todo.id ===parseInt(req.params.id));
-      if(foundIdindex === -1){
-        res.status(404).send();
-      }
-      else{
-        todos[foundIdindex].title = req.body.title;
-        todos[foundIdindex].completed = req.body.completed;
-        todos[foundIdindex].description = req.body.description;
-        saveTodos();
-        res.status(200).json(todos[foundIdindex]);
-        
-      }
-  
-    }
-  function DeleteTodo(req,res){
-  
-    const index = todos.findIndex(t => t.id ===parseInt(req.params.id));
-    if (index === -1) {
-       res.status(404).send();
-    } else {
-      todos.splice(index, 1);
-      saveTodos();
-       res.status(200).send();
-    }
-  
-  }
-  
-  
-  app.get('/todos/:id',getTodoId);
-  app.get('/todos',getTodo);
-  app.post('/todos',createTodo);
-  app.put('/todos/:id',Updateid);
-  app.delete('/todos/:id',DeleteTodo);
+  });
   
 
 
   app.get("/",(req,res)=>{
-    res.sendFile(path.join(__dirname,"index.html"));
+    console.log(__dirname);
+   res.sendFile(path.join(__dirname,"../frontend/index.html"));
+
   })
 
 
@@ -164,7 +238,6 @@ app.use(handleNotFound);
 function started() {
   console.log(`Example app listening on port ${port}`)
 }
-
 app.listen(port, started)
   
   module.exports = app;
